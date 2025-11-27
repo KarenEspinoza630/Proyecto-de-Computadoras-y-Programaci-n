@@ -336,102 +336,123 @@ void ListaCandidatas(
 	int &	iNumSugeridas)						//Numero de elementos en la lista
 ******************************************************************************************************************/
 
-void ClonaPalabras(char* szPalabraLeida, char szPalabrasSugeridas[][TAMTOKEN], int& iNumSugeridas)
+void ClonaPalabras(
+    char * szPalabraLeida,                   // No cambiada
+    char    szPalabrasSugeridas[][TAMTOKEN],  // No cambiada
+    int &   iNumSugeridas)                    // No cambiada
 {
-    iNumSugeridas = 0;
-    size_t len = strlen(szPalabraLeida);
-    char temp[TAMTOKEN];
+    // --- VARIABLES BASICAS ---
+    char alfabeto[] = "abcdefghijklmnñopqrstuvwxyzáéíóú";
+    char temporal[TAMTOKEN];   // Variable auxiliar para hacer los cambios
+    
+    int largo = 0;             // Calculamos la longitud manualmente o con strlen
+    while (szPalabraLeida[largo] != '\0') {
+        largo++;
+    }
+    
+    int numLetrasABC = 0;      // Longitud del alfabeto
+    while (alfabeto[numLetrasABC] != '\0') {
+        numLetrasABC++;
+    }
 
-    strcpy(szPalabrasSugeridas[iNumSugeridas], szPalabraLeida);
-    iNumSugeridas++;
+    int contador = 0;          // Cuenta cuántas palabras llevamos
 
-    // SUPRESION
-    for (int i = 0; i < len; i++)
-    {
-        int p = 0;
-        for (int j = 0; j < len; j++)
-        {
-            if (j != i)
-            {
-                temp[p] = szPalabraLeida[j];
-                p++;
+    // ============================================================
+    // 1. BORRAR: Quitar una letra
+    // ============================================================
+    if (largo > 1) {
+        for (int i = 0; i < largo; i++) {
+            // Paso A: Copiar palabra original al temporal
+            strcpy_s(temporal, TAMTOKEN, szPalabraLeida);
+
+            // Paso B: Recorrer todo hacia la izquierda para tapar la letra 'i'
+            int pos = i;
+            while (temporal[pos] != '\0') {
+                temporal[pos] = temporal[pos + 1];
+                pos++;
             }
+
+            // Paso C: Guardar en la lista
+            strcpy_s(szPalabrasSugeridas[contador], TAMTOKEN, temporal);
+            contador++;
         }
-        temp[p] = '\0';
-        strcpy(szPalabrasSugeridas[iNumSugeridas], temp);
-        iNumSugeridas++;
-    }
 
-    // TRASPOSICION
-    for (int i = 0; i < len - 1; i++)
-    {
-        strcpy(temp, szPalabraLeida);
-        char aux = temp[i];
-        temp[i] = temp[i + 1];
-        temp[i + 1] = aux;
+        // ============================================================
+        // 2. INTERCAMBIAR: Cambiar letra con su vecina
+        // ============================================================
+        for (int i = 0; i < largo - 1; i++) {
+            strcpy_s(temporal, TAMTOKEN, szPalabraLeida);
 
-        strcpy(szPalabrasSugeridas[iNumSugeridas], temp);
-        iNumSugeridas++;
-    }
+            // Paso B: Guardar letra actual, mover la siguiente, poner la guardada
+            char letraGuardada = temporal[i];
+            temporal[i] = temporal[i + 1];
+            temporal[i + 1] = letraGuardada;
 
-    // ALFABETO
-    char alfabeto[40] = "abcdefghijklmnopqrstuvwxyzñáéíóú";
-
-    // SUSTITUCION
-    size_t tam = strlen(alfabeto);
-    for (int i = 0; i < len; i++)
-    {
-        for (int a = 0; a < tam; a++)
-        {
-            strcpy(temp, szPalabraLeida);
-            temp[i] = alfabeto[a];
-            temp[len] = '\0';
-
-            strcpy(szPalabrasSugeridas[iNumSugeridas], temp);
-            iNumSugeridas++;
-        }
-    }
-
-    // INSERCION
-    for (int pos = 0; pos <= len; pos++)
-    {
-        for (int a = 0; a < tam; a++)
-        {
-            int p = 0;
-
-            for (int j = 0; j < pos; j++)
-            {
-                temp[p] = szPalabraLeida[j];
-                p++;
-            }
-
-            temp[p] = alfabeto[a];
-            p++;
-
-            for (int j = pos; j < len; j++)
-            {
-                temp[p] = szPalabraLeida[j];
-                p++;
-            }
-
-            temp[p] = '\0';
-
-            strcpy(szPalabrasSugeridas[iNumSugeridas], temp);
-            iNumSugeridas++;
+            // Paso C: Guardar
+            strcpy_s(szPalabrasSugeridas[contador], TAMTOKEN, temporal);
+            contador++;
         }
     }
 
-    // ORDEN BURBUJA
-    for (int i = 0; i < iNumSugeridas; i++)
-    {
-        for (int j = 0; j < iNumSugeridas - 1; j++)
-        {
-            if (strcmp(szPalabrasSugeridas[j], szPalabrasSugeridas[j + 1]) > 0)
-            {
-                char aux[TAMTOKEN];
-                strcpy(aux, szPalabrasSugeridas[j]);
-                strcpy(szPalabrasSugeridas[j], szPalabrasSugeridas[j + 1]);
-                strcpy(szPalabrasSugeridas[j + 1], aux);
+    // ============================================================
+    // 3. REEMPLAZAR: Cambiar cada letra por una del abecedario
+    // ============================================================
+    for (int i = 0; i < largo; i++) {
+        for (int j = 0; j < numLetrasABC; j++) {
+            strcpy_s(temporal, TAMTOKEN, szPalabraLeida);
+
+            // Paso B: Poner la letra del alfabeto en la posición 'i'
+            temporal[i] = alfabeto[j];
+
+            // Paso C: Guardar
+            strcpy_s(szPalabrasSugeridas[contador], TAMTOKEN, temporal);
+            contador++;
+        }
+    }
+
+    // ============================================================
+    // 4. INSERTAR: Meter una letra del abecedario en medio
+    // ============================================================
+    for (int i = 0; i <= largo; i++) {
+        for (int j = 0; j < numLetrasABC; j++) {
+            strcpy_s(temporal, TAMTOKEN, szPalabraLeida);
+
+            // Paso B: Hacer espacio moviendo letras a la derecha (del final al principio)
+            int pos = largo; 
+            while (pos >= i) {
+                temporal[pos + 1] = temporal[pos];
+                pos--;
+            }
+
+            // Paso C: Poner la letra nueva en el hueco
+            temporal[i] = alfabeto[j];
+
+            // Paso D: Guardar
+            strcpy_s(szPalabrasSugeridas[contador], TAMTOKEN, temporal);
+            contador++;
+        }
+    }
+
+    // ============================================================
+    // 5. AGREGAR LA ORIGINAL Y FINALIZAR
+    // ============================================================
+    strcpy_s(szPalabrasSugeridas[contador], TAMTOKEN, szPalabraLeida);
+    contador++;
+
+    iNumSugeridas = contador; // Actualizamos la variable externa
+
+    // ============================================================
+    // 6. ORDENAR (Metodo burbuja simple)
+    // ============================================================
+    for (int i = 0; i < iNumSugeridas - 1; i++) {
+        for (int j = i + 1; j < iNumSugeridas; j++) {
+            
+            // Si la palabra 'i' es "mayor" (va después) que la 'j', las cambiamos
+            if (strcmp(szPalabrasSugeridas[i], szPalabrasSugeridas[j]) > 0) {
+                
+                strcpy_s(temporal, TAMTOKEN, szPalabrasSugeridas[i]);
+                strcpy_s(szPalabrasSugeridas[i], TAMTOKEN, szPalabrasSugeridas[j]);
+                strcpy_s(szPalabrasSugeridas[j], TAMTOKEN, temporal);
             }
         }
     }
