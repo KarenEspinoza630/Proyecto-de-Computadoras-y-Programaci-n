@@ -8,3 +8,68 @@
 	Quiso decir: Programa principal de la aplicacion de la distancia de Levenstein.
 	
 ******************************************************************************************************************/
+
+#include "stdafx.h"
+#include <string.h>
+#include "corrector.h"
+#include <ctype.h>
+//Funciones publicas del proyecto
+/*****************************************************************************************************************
+	DICCIONARIO: Esta funcion crea el diccionario completo
+	char *	szNombre				:	Nombre del archivo de donde se sacaran las palabras del diccionario	
+	char	szPalabras[][TAMTOKEN]	:	Arreglo con las palabras completas del diccionario
+	int		iEstadisticas[]			:	Arreglo con el numero de veces que aparecen las palabras en el diccionario
+	int &	iNumElementos			:	Numero de elementos en el diccionario
+******************************************************************************************************************/
+void Diccionario(char* szNombre, char szPalabras[][TAMTOKEN], int iEstadisticas[], int& iNumElementos)
+{
+    FILE* fp; 
+    char c, tmp[TAMTOKEN]; 
+    int h = 0, n = 0;
+    
+    fopen_s(&fp, szNombre, "r");
+
+    if (fp) {
+        while (fscanf_s(fp, "%c", &c, 1) == 1) {
+
+            int sep = (c == ' ' || c == ',' || c == '\n' || c == '\t' || c == '\r' || c == '.' || c == '(' || c == ')' || c == ';');
+
+            if (!sep && h < TAMTOKEN - 1) tmp[h++] = tolower(c);
+            else if (sep && h > 0) {
+                tmp[h] = '\0';
+
+                int pos = -1, k = 0;
+                while (k < n) {
+                    if (strcmp(szPalabras[k], tmp) == 0) pos = k;
+                    k++;
+                }
+
+                if (pos == -1 && n < NUMPALABRAS) strcpy_s(szPalabras[n], 50, tmp), iEstadisticas[n++] = 1;
+                else if (pos != -1) iEstadisticas[pos]++;
+                h = 0;
+            }
+        }
+
+        if (h > 0) {
+            tmp[h] = '\0';
+            int pos = -1, k = 0;
+            while (k < n) { if (strcmp(szPalabras[k], tmp) == 0) pos = k; k++; }
+
+            if (pos == -1 && n < NUMPALABRAS) strcpy_s(szPalabras[n], 50, tmp), iEstadisticas[n++] = 1;
+            else if (pos != -1) iEstadisticas[pos]++;
+        }
+
+        fclose(fp);
+    }
+
+    iNumElementos = n;
+
+    // Ordenamiento burbuja 
+    for (int i = 0; i < iNumElementos - 1; i++)
+        for (int j = i + 1; j < iNumElementos; j++)
+            if (strcmp(szPalabras[i], szPalabras[j]) > 0) {
+                char t[TAMTOKEN]; int x;
+                strcpy_s(t, 50, szPalabras[i]); strcpy_s(szPalabras[i], 50, szPalabras[j]); strcpy_s(szPalabras[j], 50, t);
+                x = iEstadisticas[i]; iEstadisticas[i] = iEstadisticas[j]; iEstadisticas[j] = x;
+            }
+}
