@@ -22,58 +22,231 @@
 	int &	iNumElementos			:	Numero de elementos en el diccionario
 ******************************************************************************************************************/
 void Diccionario(char* szNombre, char szPalabras[][TAMTOKEN], int iEstadisticas[], int& iNumElementos)
+
 {
-    FILE* fp; 
-    char c, tmp[TAMTOKEN]; 
-    int h = 0, n = 0;
-    
-    fopen_s(&fp, szNombre, "r");
 
-    if (fp) {
-        while (fscanf_s(fp, "%c", &c, 1) == 1) {
+    FILE* f = fopen(szNombre, "r");
 
-            int sep = (c == ' ' || c == ',' || c == '\n' || c == '\t' || c == '\r' || c == '.' || c == '(' || c == ')' || c == ';');
+    iNumElementos = 0;
 
-            if (!sep && h < TAMTOKEN - 1) tmp[h++] = tolower(c);
-            else if (sep && h > 0) {
-                tmp[h] = '\0';
 
-                int pos = -1, k = 0;
-                while (k < n) {
-                    if (strcmp(szPalabras[k], tmp) == 0) pos = k;
-                    k++;
-                }
 
-                if (pos == -1 && n < NUMPALABRAS) strcpy_s(szPalabras[n], 50, tmp), iEstadisticas[n++] = 1;
-                else if (pos != -1) iEstadisticas[pos]++;
-                h = 0;
-            }
-        }
+    if (f == NULL)
 
-        if (h > 0) {
-            tmp[h] = '\0';
-            int pos = -1, k = 0;
-            while (k < n) { if (strcmp(szPalabras[k], tmp) == 0) pos = k; k++; }
+    {
 
-            if (pos == -1 && n < NUMPALABRAS) strcpy_s(szPalabras[n], 50, tmp), iEstadisticas[n++] = 1;
-            else if (pos != -1) iEstadisticas[pos]++;
-        }
+        iNumElementos = 0;
 
-        fclose(fp);
     }
 
-    iNumElementos = n;
+    else
 
-    // Ordenamiento burbuja 
-    for (int i = 0; i < iNumElementos - 1; i++)
-        for (int j = i + 1; j < iNumElementos; j++)
-            if (strcmp(szPalabras[i], szPalabras[j]) > 0) {
-                char t[TAMTOKEN]; int x;
-                strcpy_s(t, 50, szPalabras[i]); strcpy_s(szPalabras[i], 50, szPalabras[j]); strcpy_s(szPalabras[j], 50, t);
-                x = iEstadisticas[i]; iEstadisticas[i] = iEstadisticas[j]; iEstadisticas[j] = x;
+    {
+
+        char palabra[TAMTOKEN];
+
+        int c;
+
+        int idx = 0;
+
+        while (1)
+
+        {
+
+            c = fgetc(f);
+
+            if (c == EOF)
+
+            {
+
+                if (idx > 0)
+
+                {
+
+                    palabra[idx] = '\0';
+
+                    for (int q = 0; q < idx; q++)
+
+                    {
+
+                        if (palabra[q] >= 'A' && palabra[q] <= 'Z')
+
+                            palabra[q] += 32;
+
+                    }
+
+                    int existe = 0;
+
+                    int pos = 0;
+
+                    for (int k = 0; k < iNumElementos; k++)
+
+                    {
+
+                        if (strcmp(palabra, szPalabras[k]) == 0)
+
+                        {
+
+                            existe = 1;
+
+                            pos = k;
+
+                            k = iNumElementos;
+
+                        }
+
+                    }
+
+
+                    if (existe == 1)
+
+                        iEstadisticas[pos]++;
+
+                    else
+
+                    {
+
+                        strcpy_s(szPalabras[iNumElementos], palabra);
+
+                        iEstadisticas[iNumElementos] = 1;
+
+                        iNumElementos++;
+
+                    }
+
+                }
+
+                break;
+
             }
-}
 
+            if (c == ' ' || c == '\n' || c == '\t' || c == '\r' || c == ',' || c == ';' || c == '(' || c == ')')
+
+            {
+
+                if (idx > 0)
+
+                {
+
+                    palabra[idx] = '\0';
+
+
+
+                    for (int q = 0; q < idx; q++)
+
+                    {
+
+                        if (palabra[q] >= 'A' && palabra[q] <= 'Z')
+
+                            palabra[q] += 32;
+
+                    }
+
+
+
+                    int existe = 0;
+
+                    int pos = 0;
+
+                    for (int k = 0; k < iNumElementos; k++)
+
+                    {
+
+                        if (strcmp(palabra, szPalabras[k]) == 0)
+
+                        {
+
+                            existe = 1;
+
+                            pos = k;
+
+                            k = iNumElementos;
+
+                        }
+
+                    }
+
+
+                    if (existe == 1)
+
+                        iEstadisticas[pos]++;
+
+                    else
+
+                    {
+
+                        strcpy_s(szPalabras[iNumElementos], palabra);
+
+                        iEstadisticas[iNumElementos] = 1;
+
+                        iNumElementos++;
+
+                    }
+
+                    idx = 0;
+
+                }
+
+            }
+
+            else
+
+            {
+
+                if (idx < TAMTOKEN - 1)
+
+                {
+
+                    palabra[idx] = (char)c;
+
+                    idx++;
+
+                }
+
+            }
+
+        }
+
+        fclose(f);
+
+    }
+
+    // ORDENAMIENTO BURBUJA
+    for (int i = 0; i < iNumElementos; i++)
+
+    {
+
+        for (int j = 0; j < iNumElementos - 1; j++)
+
+        {
+
+            if (strcmp(szPalabras[j], szPalabras[j + 1]) > 0)
+
+            {
+
+                char temp[TAMTOKEN];
+
+                strcpy_s(temp, szPalabras[j]);
+
+                strcpy_s(szPalabras[j], szPalabras[j + 1]);
+
+                strcpy_s(szPalabras[j + 1], temp);
+
+
+
+                int t = iEstadisticas[j];
+
+                iEstadisticas[j] = iEstadisticas[j + 1];
+
+                iEstadisticas[j + 1] = t;
+
+            }
+
+        }
+
+    }
+
+}
 /*****************************************************************************************************************
 	ListaCandidatas: Esta funcion recupera desde el diccionario las palabras validas y su peso
 	Regresa las palabras ordenadas por su peso
