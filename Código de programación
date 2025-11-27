@@ -343,36 +343,34 @@ void ClonaPalabras(
 {
     // --- VARIABLES BASICAS ---
     char alfabeto[] = "abcdefghijklmnñopqrstuvwxyzáéíóú";
-    char temporal[TAMTOKEN];   // Variable auxiliar para hacer los cambios
+    char temporal[TAMTOKEN];  
     
-    int largo = 0;             // Calculamos la longitud manualmente o con strlen
+    int largo = 0;            
     while (szPalabraLeida[largo] != '\0') {
         largo++;
     }
     
-    int numLetrasABC = 0;      // Longitud del alfabeto
+    int numLetrasABC = 0;      
     while (alfabeto[numLetrasABC] != '\0') {
         numLetrasABC++;
     }
 
-    int contador = 0;          // Cuenta cuántas palabras llevamos
+    int contador = 0;          
 
     // ============================================================
     // 1. BORRAR: Quitar una letra
     // ============================================================
     if (largo > 1) {
         for (int i = 0; i < largo; i++) {
-            // Paso A: Copiar palabra original al temporal
+   
             strcpy_s(temporal, TAMTOKEN, szPalabraLeida);
 
-            // Paso B: Recorrer todo hacia la izquierda para tapar la letra 'i'
             int pos = i;
             while (temporal[pos] != '\0') {
                 temporal[pos] = temporal[pos + 1];
                 pos++;
             }
 
-            // Paso C: Guardar en la lista
             strcpy_s(szPalabrasSugeridas[contador], TAMTOKEN, temporal);
             contador++;
         }
@@ -383,12 +381,10 @@ void ClonaPalabras(
         for (int i = 0; i < largo - 1; i++) {
             strcpy_s(temporal, TAMTOKEN, szPalabraLeida);
 
-            // Paso B: Guardar letra actual, mover la siguiente, poner la guardada
             char letraGuardada = temporal[i];
             temporal[i] = temporal[i + 1];
             temporal[i + 1] = letraGuardada;
 
-            // Paso C: Guardar
             strcpy_s(szPalabrasSugeridas[contador], TAMTOKEN, temporal);
             contador++;
         }
@@ -401,10 +397,8 @@ void ClonaPalabras(
         for (int j = 0; j < numLetrasABC; j++) {
             strcpy_s(temporal, TAMTOKEN, szPalabraLeida);
 
-            // Paso B: Poner la letra del alfabeto en la posición 'i'
             temporal[i] = alfabeto[j];
 
-            // Paso C: Guardar
             strcpy_s(szPalabrasSugeridas[contador], TAMTOKEN, temporal);
             contador++;
         }
@@ -417,14 +411,12 @@ void ClonaPalabras(
         for (int j = 0; j < numLetrasABC; j++) {
             strcpy_s(temporal, TAMTOKEN, szPalabraLeida);
 
-            // Paso B: Hacer espacio moviendo letras a la derecha (del final al principio)
             int pos = largo; 
             while (pos >= i) {
                 temporal[pos + 1] = temporal[pos];
                 pos--;
             }
 
-            // Paso C: Poner la letra nueva en el hueco
             temporal[i] = alfabeto[j];
 
             // Paso D: Guardar
