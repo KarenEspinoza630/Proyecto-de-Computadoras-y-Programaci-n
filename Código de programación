@@ -73,3 +73,85 @@ void Diccionario(char* szNombre, char szPalabras[][TAMTOKEN], int iEstadisticas[
                 x = iEstadisticas[i]; iEstadisticas[i] = iEstadisticas[j]; iEstadisticas[j] = x;
             }
 }
+
+/*****************************************************************************************************************
+	ListaCandidatas: Esta funcion recupera desde el diccionario las palabras validas y su peso
+	Regresa las palabras ordenadas por su peso
+	char	szPalabrasSugeridas[][TAMTOKEN],	//Lista de palabras clonadas
+	int		iNumSugeridas,						//Lista de palabras clonadas
+	char	szPalabras[][TAMTOKEN],				//Lista de palabras del diccionario
+	int		iEstadisticas[],					//Lista de las frecuencias de las palabras
+	int		iNumElementos,						//Numero de elementos en el diccionario
+	char	szListaFinal[][TAMTOKEN],			//Lista final de palabras a sugerir
+	int		iPeso[],							//Peso de las palabras en la lista final
+	int &	iNumLista)							//Numero de elementos en la szListaFinal
+******************************************************************************************************************/
+void ListaCandidatas(
+    char    szPalabrasSugeridas[][TAMTOKEN],
+    int     iNumSugeridas,
+    char    szPalabras[][TAMTOKEN],
+    int     iEstadisticas[],
+    int     iNumElementos,
+    char    szListaFinal[][TAMTOKEN],
+    int     iPeso[],
+    int& iNumLista)
+{
+    iNumLista = 0; // Reiniciamos el contador
+
+    // 1) Cruzar listas verificando duplicados y existencia en diccionario
+    for (int s = 0; s < iNumSugeridas; s++) {
+
+        // A. Verificar si ya existe en la lista final 
+        int yaExiste = 0; // Bandera de control
+        int k = 0;
+        while (k < iNumLista && !yaExiste) {
+            if (strcmp(szListaFinal[k], szPalabrasSugeridas[s]) == 0) {
+                yaExiste = 1; // Esto hará que el while termine en la sig. iteración
+            }
+            k++;
+        }
+
+        // B. Si no existe, buscamos en el diccionario 
+        if (!yaExiste) {
+            int r = 0;
+            int encontradoEnDic = 0; // Bandera para detener búsqueda
+
+            while (r < iNumElementos && !encontradoEnDic) {
+                // Si coincide la palabra
+                if (strcmp(szPalabras[r], szPalabrasSugeridas[s]) == 0) {
+
+                    // Guardamos si hay espacio
+                    if (iNumLista < NUMPALABRAS) {
+                        strcpy_s(szListaFinal[iNumLista], TAMTOKEN, szPalabras[r]);
+                        iPeso[iNumLista] = iEstadisticas[r];
+                        iNumLista++;
+                    }
+                    encontradoEnDic = 1; 
+                }
+                r++;
+            }
+        }
+    }
+
+    // 2) Ordenar 
+    for (int a = 0; a < iNumLista - 1; a++) {
+        int maxIdx = a;
+
+        for (int b = a + 1; b < iNumLista; b++) {
+            if (iPeso[b] > iPeso[maxIdx]) {
+                maxIdx = b;
+            }
+        }
+
+        if (maxIdx != a) {
+            int tempPeso = iPeso[a];
+            iPeso[a] = iPeso[maxIdx];
+            iPeso[maxIdx] = tempPeso;
+
+            char tempStr[TAMTOKEN];
+            strcpy_s(tempStr, TAMTOKEN, szListaFinal[a]);
+            strcpy_s(szListaFinal[a], TAMTOKEN, szListaFinal[maxIdx]);
+            strcpy_s(szListaFinal[maxIdx], TAMTOKEN, tempStr);
+        }
+    }
+}
