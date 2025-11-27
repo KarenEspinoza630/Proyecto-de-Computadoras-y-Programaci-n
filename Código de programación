@@ -155,3 +155,111 @@ void ListaCandidatas(
         }
     }
 }
+
+/*****************************************************************************************************************
+	ClonaPalabras: toma una palabra y obtiene todas las combinaciones y permutaciones requeridas por el metodo
+	char *	szPalabraLeida,						// Palabra a clonar
+	char	szPalabrasSugeridas[][TAMTOKEN], 	//Lista de palabras clonadas
+	int &	iNumSugeridas)						//Numero de elementos en la lista
+******************************************************************************************************************/
+
+void ClonaPalabras(char* szPalabraLeida, char szPalabrasSugeridas[][TAMTOKEN], int& iNumSugeridas)
+{
+    iNumSugeridas = 0;
+    size_t len = strlen(szPalabraLeida);
+    char temp[TAMTOKEN];
+
+    strcpy(szPalabrasSugeridas[iNumSugeridas], szPalabraLeida);
+    iNumSugeridas++;
+
+    // SUPRESION
+    for (int i = 0; i < len; i++)
+    {
+        int p = 0;
+        for (int j = 0; j < len; j++)
+        {
+            if (j != i)
+            {
+                temp[p] = szPalabraLeida[j];
+                p++;
+            }
+        }
+        temp[p] = '\0';
+        strcpy(szPalabrasSugeridas[iNumSugeridas], temp);
+        iNumSugeridas++;
+    }
+
+    // TRASPOSICION
+    for (int i = 0; i < len - 1; i++)
+    {
+        strcpy(temp, szPalabraLeida);
+        char aux = temp[i];
+        temp[i] = temp[i + 1];
+        temp[i + 1] = aux;
+
+        strcpy(szPalabrasSugeridas[iNumSugeridas], temp);
+        iNumSugeridas++;
+    }
+
+    // ALFABETO
+    char alfabeto[40] = "abcdefghijklmnopqrstuvwxyzñáéíóú";
+
+    // SUSTITUCION
+    size_t tam = strlen(alfabeto);
+    for (int i = 0; i < len; i++)
+    {
+        for (int a = 0; a < tam; a++)
+        {
+            strcpy(temp, szPalabraLeida);
+            temp[i] = alfabeto[a];
+            temp[len] = '\0';
+
+            strcpy(szPalabrasSugeridas[iNumSugeridas], temp);
+            iNumSugeridas++;
+        }
+    }
+
+    // INSERCION
+    for (int pos = 0; pos <= len; pos++)
+    {
+        for (int a = 0; a < tam; a++)
+        {
+            int p = 0;
+
+            for (int j = 0; j < pos; j++)
+            {
+                temp[p] = szPalabraLeida[j];
+                p++;
+            }
+
+            temp[p] = alfabeto[a];
+            p++;
+
+            for (int j = pos; j < len; j++)
+            {
+                temp[p] = szPalabraLeida[j];
+                p++;
+            }
+
+            temp[p] = '\0';
+
+            strcpy(szPalabrasSugeridas[iNumSugeridas], temp);
+            iNumSugeridas++;
+        }
+    }
+
+    // ORDEN BURBUJA
+    for (int i = 0; i < iNumSugeridas; i++)
+    {
+        for (int j = 0; j < iNumSugeridas - 1; j++)
+        {
+            if (strcmp(szPalabrasSugeridas[j], szPalabrasSugeridas[j + 1]) > 0)
+            {
+                char aux[TAMTOKEN];
+                strcpy(aux, szPalabrasSugeridas[j]);
+                strcpy(szPalabrasSugeridas[j], szPalabrasSugeridas[j + 1]);
+                strcpy(szPalabrasSugeridas[j + 1], aux);
+            }
+        }
+    }
+}
